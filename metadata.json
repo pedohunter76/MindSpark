@@ -1,0 +1,5 @@
+{
+  "name": "MindSpark Trivia",
+  "description": "An AI-powered trivia learning app featuring deep-dive search explanations and offline progress tracking.",
+  "requestFramePermissions": []
+}
