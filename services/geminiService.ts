@@ -2,7 +2,18 @@ import { GoogleGenAI, Type, Modality } from "@google/genai";
 import { Question, SearchGroundingResult, Difficulty } from "../types";
 import { base64ToUint8Array, decodeAudioData } from "../utils/audio";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+let aiClient: GoogleGenAI | null = null;
+
+function getAiClient(): GoogleGenAI {
+  if (!aiClient) {
+    const apiKey = process.env.API_KEY;
+    if (!apiKey) {
+      console.warn("API Key is missing. Check your environment variables.");
+    }
+    aiClient = new GoogleGenAI({ apiKey: apiKey || "" });
+  }
+  return aiClient;
+}
 
 // --- Text Question Generation ---
 
@@ -28,6 +39,7 @@ export async function generateQuestion(category: string, history: string[] = [],
       promptText += `\n\nTo ensure variety, do not use the following questions or exact topics again:\n- ${history.join('\n- ')}`;
     }
 
+    const ai = getAiClient();
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
       contents: promptText,
@@ -65,6 +77,7 @@ export async function generateQuestion(category: string, history: string[] = [],
 
 export async function deepDiveTopic(topic: string): Promise<{ text: string, sources: SearchGroundingResult[] }> {
   try {
+    const ai = getAiClient();
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
       contents: `Explain "${topic}" in detail. Include fun facts or historical context.`,
@@ -93,6 +106,7 @@ export async function deepDiveTopic(topic: string): Promise<{ text: string, sour
 
 export async function playTextToSpeech(text: string, voiceName: string = 'Kore'): Promise<void> {
   try {
+    const ai = getAiClient();
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-preview-tts",
       contents: [{ parts: [{ text }] }],

@@ -2,8 +2,6 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { GoogleGenAI, LiveServerMessage, Modality } from '@google/genai';
 import { createPcmBlob, base64ToUint8Array, decodeAudioData } from '../utils/audio';
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
 export function useLiveTrivia() {
   const [isConnected, setIsConnected] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -19,6 +17,11 @@ export function useLiveTrivia() {
   const connect = useCallback(async (category: string) => {
     try {
       setError(null);
+      const apiKey = process.env.API_KEY;
+      if (!apiKey) {
+        throw new Error("API Key is missing");
+      }
+      const ai = new GoogleGenAI({ apiKey });
       
       // Setup Audio Contexts
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -120,7 +123,7 @@ export function useLiveTrivia() {
 
     } catch (err) {
       console.error(err);
-      setError("Failed to start voice session. Check permissions.");
+      setError("Failed to start voice session. Check permissions or API Key.");
     }
   }, []);
 

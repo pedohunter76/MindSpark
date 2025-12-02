@@ -7,9 +7,11 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     define: {
+      // Prevent crashes if libraries access process.env directly
+      'process.env': {},
       // Define process.env.API_KEY for client-side access.
       // JSON.stringify is crucial to ensure it is inserted as a string literal.
-      'process.env.API_KEY': JSON.stringify(env.API_KEY),
+      'process.env.API_KEY': JSON.stringify(env.API_KEY || ''),
     },
     build: {
       outDir: 'dist',
